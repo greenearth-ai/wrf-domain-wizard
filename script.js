@@ -4,129 +4,165 @@ const map = L.map('map').setView([20, 0], 2);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
 
-  attribution: '© OpenStreetMap' 
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' 
 
 }).addTo(map); 
 
  
 
-let drawnItems = new L.FeatureGroup(); 
+// Feature group for domains 
+
+const drawnItems = new L.FeatureGroup(); 
 
 map.addLayer(drawnItems); 
 
  
 
-// Draw domains 
+// Add draw controls 
 
-document.getElementById('drawBtn').addEventListener('click', () => { 
+const drawControl = new L.Control.Draw({ 
 
-  try { 
+  edit: { 
 
-    drawnItems.clearLayers(); 
+    featureGroup: drawnItems, 
 
-    const domainCount = parseInt(document.getElementById('domainCount').value); 
+    edit: false 
 
-    const bounds = map.getBounds(); 
+  }, 
 
-     
+  draw: { 
 
-    for (let i = 0; i < domainCount; i++) { 
+    rectangle: { 
 
-      const nestFactor = 0.8 ** i; 
+      showArea: false, 
 
-      const nestedBounds = L.latLngBounds( 
+      repeatMode: false 
 
-        [ 
+    }, 
 
-          bounds.getSouth() + (bounds.getCenter().lat - bounds.getSouth()) * (1 - nestFactor), 
+    polygon: false, 
 
-          bounds.getWest() + (bounds.getCenter().lng - bounds.getWest()) * (1 - nestFactor) 
+    circle: false, 
 
-        ], 
+    marker: false, 
 
-        [ 
-
-          bounds.getNorth() - (bounds.getNorth() - bounds.getCenter().lat) * (1 - nestFactor), 
-
-          bounds.getEast() - (bounds.getEast() - bounds.getCenter().lng) * (1 - nestFactor) 
-
-        ] 
-
-      ); 
-
-       
-
-      L.rectangle(nestedBounds, {  
-
-        color: i === 0 ? 'red' : 'blue',  
-
-        weight: 2, 
-
-        fillOpacity: 0.1 
-
-      }).addTo(drawnItems); 
-
-    } 
-
-     
-
-    updateOutput(bounds, domainCount); 
-
-  } catch (error) { 
-
-    console.error("Drawing error:", error); 
-
-    alert("Error drawing domains. Check console for details."); 
+    polyline: false 
 
   } 
 
 }); 
 
+map.addControl(drawControl); 
+
+ 
+
+// Draw initial domains 
+
+document.getElementById('drawBtn').addEventListener('click', () => { 
+
+  drawnItems.clearLayers(); 
+
+  const domainCount = parseInt(document.getElementById('domainCount').value); 
+
+   
+
+  for (let i = 0; i < domainCount; i++) { 
+
+    const bounds = getNestedBounds(map.getBounds(), i); 
+
+    const rectangle = L.rectangle(bounds, { 
+
+      color: i === 0 ? '#d9534f' : '#5bc0de', 
+
+      weight: 2, 
+
+      fillOpacity: 0.1, 
+
+      draggable: true 
+
+    }).addTo(drawnItems); 
+
+     
+
+    rectangle.editing.enable(); 
+
+    rectangle.on('edit', updateOutput); 
+
+  } 
+
+   
+
+  updateOutput(); 
+
+}); 
+
+ 
+
+// Calculate nested bounds 
+
+function getNestedBounds(bounds, index) { 
+
+  const nestFactor = 0.8 ** index; 
+
+  return L.latLngBounds( 
+
+    [ 
+
+      bounds.getSouth() + (bounds.getCenter().lat - bounds.getSouth()) * (1 - nestFactor), 
+
+      bounds.getWest() + (bounds.getCenter().lng - bounds.getWest()) * (1 - nestFactor) 
+
+    ], 
+
+    [ 
+
+      bounds.getNorth() - (bounds.getNorth() - bounds.getCenter().lat) * (1 - nestFactor), 
+
+      bounds.getEast() - (bounds.getEast() - bounds.getCenter().lng) * (1 - nestFactor) 
+
+    ] 
+
+  ); 
+
+} 
+
  
 
 // Update output display 
 
-function updateOutput(bounds, domainCount) { 
+function updateOutput() { 
 
-  let output = `<h5>Domain Boundaries</h5>`; 
+  let output = '<h5>Domain Boundaries</h5>'; 
 
-  for (let i = 0; i < domainCount; i++) { 
+  let counter = 1; 
 
-    const nestFactor = 0.8 ** i; 
+   
 
-    const nestedBounds = L.latLngBounds( 
+  drawnItems.eachLayer(layer => { 
 
-      [ 
-
-        bounds.getSouth() + (bounds.getCenter().lat - bounds.getSouth()) * (1 - nestFactor), 
-
-        bounds.getWest() + (bounds.getCenter().lng - bounds.getWest()) * (1 - nestFactor) 
-
-      ], 
-
-      [ 
-
-        bounds.getNorth() - (bounds.getNorth() - bounds.getCenter().lat) * (1 - nestFactor), 
-
-        bounds.getEast() - (bounds.getEast() - bounds.getCenter().lng) * (1 - nestFactor) 
-
-      ] 
-
-    ); 
+    const bounds = layer.getBounds(); 
 
     output += ` 
 
-      <p><strong>Domain ${i + 1}:</strong><br> 
+      <div class="domain-info mb-2 p-2 border rounded"> 
 
-      SW: ${nestedBounds.getSouthWest().lat.toFixed(2)}, ${nestedBounds.getSouthWest().lng.toFixed(2)}<br> 
+        <strong>Domain ${counter}:</strong><br> 
 
-      NE: ${nestedBounds.getNorthEast().lat.toFixed(2)}, ${nestedBounds.getNorthEast().lng.toFixed(2)} 
+        SW: ${bounds.getSouthWest().lat.toFixed(4)}, ${bounds.getSouthWest().lng.toFixed(4)}<br> 
 
-      </p> 
+        NE: ${bounds.getNorthEast().lat.toFixed(4)}, ${bounds.getNorthEast().lng.toFixed(4)}<br> 
+
+        Center: ${bounds.getCenter().lat.toFixed(4)}, ${bounds.getCenter().lng.toFixed(4)} 
+
+      </div> 
 
     `; 
 
-  } 
+    counter++; 
+
+  }); 
+
+   
 
   document.getElementById('output').innerHTML = output; 
 
@@ -138,36 +174,46 @@ function updateOutput(bounds, domainCount) {
 
 document.getElementById('exportBtn').addEventListener('click', () => { 
 
-  try { 
+  const domains = []; 
 
-    const domainCount = parseInt(document.getElementById('domainCount').value); 
+  drawnItems.eachLayer(layer => domains.push(layer.getBounds())); 
 
-    const bounds = map.getBounds(); 
+   
 
-    const namelist = generateNamelist(bounds, domainCount); 
+  if (domains.length === 0) { 
 
-     
+    alert("Please generate domains first!"); 
 
-    const blob = new Blob([namelist], { type: 'text/plain' }); 
-
-    const url = URL.createObjectURL(blob); 
-
-    const a = document.createElement('a'); 
-
-    a.href = url; 
-
-    a.download = 'namelist.wps'; 
-
-    a.click(); 
-
-    URL.revokeObjectURL(url); 
-
-  } catch (error) { 
-
-    console.error("Export error:", error); 
-
-    alert("Error generating namelist.wps. Check console for details."); 
+    return; 
 
   } 
 
+   
+
+  const namelist = generateNamelist(domains); 
+
+  const blob = new Blob([namelist], { type: 'text/plain' }); 
+
+  const url = URL.createObjectURL(blob); 
+
+  const a = document.createElement('a'); 
+
+  a.href = url; 
+
+  a.download = 'namelist.wps'; 
+
+  document.body.appendChild(a); 
+
+  a.click(); 
+
+  document.body.removeChild(a); 
+
+  URL.revokeObjectURL(url); 
+
 }); 
+
+ 
+
+// Initialize 
+
+updateOutput(); 
