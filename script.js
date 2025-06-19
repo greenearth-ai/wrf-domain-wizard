@@ -16,53 +16,75 @@ map.addLayer(drawnItems);
 
  
 
-// Draw domains based on user selection 
+// Draw domains 
 
 document.getElementById('drawBtn').addEventListener('click', () => { 
 
-  drawnItems.clearLayers(); 
+  try { 
 
-  const domainCount = parseInt(document.getElementById('domainCount').value); 
+    drawnItems.clearLayers(); 
 
-  let bounds = map.getBounds(); 
+    const domainCount = parseInt(document.getElementById('domainCount').value); 
 
- 
-
-  for (let i = 0; i < domainCount; i++) { 
-
-    // Adjust bounds for nested domains (example: shrink by 20%) 
-
-    const nestFactor = 0.8 ** i; 
-
-    const nestedBounds = L.latLngBounds( 
-
-      map.getCenter().lat - (map.getCenter().lat - bounds.getSouth()) * nestFactor, 
-
-      map.getCenter().lng - (map.getCenter().lng - bounds.getWest()) * nestFactor, 
-
-      map.getCenter().lat + (bounds.getNorth() - map.getCenter().lat) * nestFactor, 
-
-      map.getCenter().lng + (bounds.getEast() - map.getCenter().lng) * nestFactor 
-
-    ); 
+    const bounds = map.getBounds(); 
 
      
 
-    L.rectangle(nestedBounds, { color: i === 0 ? 'red' : 'blue', weight: 2 }).addTo(drawnItems); 
+    for (let i = 0; i < domainCount; i++) { 
+
+      const nestFactor = 0.8 ** i; 
+
+      const nestedBounds = L.latLngBounds( 
+
+        [ 
+
+          bounds.getSouth() + (bounds.getCenter().lat - bounds.getSouth()) * (1 - nestFactor), 
+
+          bounds.getWest() + (bounds.getCenter().lng - bounds.getWest()) * (1 - nestFactor) 
+
+        ], 
+
+        [ 
+
+          bounds.getNorth() - (bounds.getNorth() - bounds.getCenter().lat) * (1 - nestFactor), 
+
+          bounds.getEast() - (bounds.getEast() - bounds.getCenter().lng) * (1 - nestFactor) 
+
+        ] 
+
+      ); 
+
+       
+
+      L.rectangle(nestedBounds, {  
+
+        color: i === 0 ? 'red' : 'blue',  
+
+        weight: 2, 
+
+        fillOpacity: 0.1 
+
+      }).addTo(drawnItems); 
+
+    } 
+
+     
+
+    updateOutput(bounds, domainCount); 
+
+  } catch (error) { 
+
+    console.error("Drawing error:", error); 
+
+    alert("Error drawing domains. Check console for details."); 
 
   } 
-
- 
-
-  // Display coordinates 
-
-  updateOutput(bounds, domainCount); 
 
 }); 
 
  
 
-// Update the UI with domain info 
+// Update output display 
 
 function updateOutput(bounds, domainCount) { 
 
@@ -74,13 +96,21 @@ function updateOutput(bounds, domainCount) {
 
     const nestedBounds = L.latLngBounds( 
 
-      map.getCenter().lat - (map.getCenter().lat - bounds.getSouth()) * nestFactor, 
+      [ 
 
-      map.getCenter().lng - (map.getCenter().lng - bounds.getWest()) * nestFactor, 
+        bounds.getSouth() + (bounds.getCenter().lat - bounds.getSouth()) * (1 - nestFactor), 
 
-      map.getCenter().lat + (bounds.getNorth() - map.getCenter().lat) * nestFactor, 
+        bounds.getWest() + (bounds.getCenter().lng - bounds.getWest()) * (1 - nestFactor) 
 
-      map.getCenter().lng + (bounds.getEast() - map.getCenter().lng) * nestFactor 
+      ], 
+
+      [ 
+
+        bounds.getNorth() - (bounds.getNorth() - bounds.getCenter().lat) * (1 - nestFactor), 
+
+        bounds.getEast() - (bounds.getEast() - bounds.getCenter().lng) * (1 - nestFactor) 
+
+      ] 
 
     ); 
 
@@ -108,26 +138,36 @@ function updateOutput(bounds, domainCount) {
 
 document.getElementById('exportBtn').addEventListener('click', () => { 
 
-  const domainCount = parseInt(document.getElementById('domainCount').value); 
+  try { 
 
-  const bounds = map.getBounds(); 
+    const domainCount = parseInt(document.getElementById('domainCount').value); 
 
-  const namelist = generateNamelist(bounds, domainCount); 
+    const bounds = map.getBounds(); 
 
-   
+    const namelist = generateNamelist(bounds, domainCount); 
 
-  // Create downloadable file 
+     
 
-  const blob = new Blob([namelist], { type: 'text/plain' }); 
+    const blob = new Blob([namelist], { type: 'text/plain' }); 
 
-  const url = URL.createObjectURL(blob); 
+    const url = URL.createObjectURL(blob); 
 
-  const a = document.createElement('a'); 
+    const a = document.createElement('a'); 
 
-  a.href = url; 
+    a.href = url; 
 
-  a.download = 'namelist.wps'; 
+    a.download = 'namelist.wps'; 
 
-  a.click(); 
+    a.click(); 
+
+    URL.revokeObjectURL(url); 
+
+  } catch (error) { 
+
+    console.error("Export error:", error); 
+
+    alert("Error generating namelist.wps. Check console for details."); 
+
+  } 
 
 }); 

@@ -32,20 +32,6 @@ function generateNamelist(bounds, domainCount) {
 
     const nestFactor = 0.8 ** i; 
 
-    const nestedBounds = L.latLngBounds( 
-
-      map.getCenter().lat - (map.getCenter().lat - bounds.getSouth()) * nestFactor, 
-
-      map.getCenter().lng - (map.getCenter().lng - bounds.getWest()) * nestFactor, 
-
-      map.getCenter().lat + (bounds.getNorth() - map.getCenter().lat) * nestFactor, 
-
-      map.getCenter().lng + (bounds.getEast() - map.getCenter().lng) * nestFactor 
-
-    ); 
-
-     
-
     namelist += ` 
 
  parent_grid_ratio = ${i === 0 ? 1 : 3}, 
@@ -88,4 +74,4 @@ function generateNamelist(bounds, domainCount) {
 
   return namelist; 
 
-} 
+}
