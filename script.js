@@ -7,24 +7,6 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 let drawnItems = new L.FeatureGroup(); 
 map.addLayer(drawnItems);
 
-// Initialize the draw control
-const drawControl = new L.Control.Draw({
-  edit: {
-    featureGroup: drawnItems,
-    edit: false, // Disable editing (we'll handle resizing separately)
-    remove: false // Disable deletion
-  },
-  draw: {
-    rectangle: false,
-    circle: false,
-    circlemarker: false,
-    polygon: false,
-    polyline: false,
-    marker: false
-  }
-});
-map.addControl(drawControl);
-
 // Store domain references
 const domains = [];
 
@@ -60,7 +42,8 @@ function drawDomains() {
         className: `domain-${i}`
       }).addTo(drawnItems);
       
-      // Make domain resizable
+      // Enable editing (resizing and moving)
+      domain.editing = new L.Handler.RectangleEdit(map, domain);
       domain.editing.enable();
       
       // Store reference
