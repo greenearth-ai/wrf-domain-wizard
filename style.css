@@ -1,29 +1,27 @@
-#map {  
+#map {
+  height: 600px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
 
-  height: 600px;  
+.controls {
+  height: 600px;
+  overflow-y: auto;
+}
 
-  border-radius: 8px; 
+h1 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
 
-  border: 1px solid #ddd; 
+.domain-0 {
+  color: red;
+}
 
-} 
+.domain-1 {
+  color: blue;
+}
 
- 
-
-.controls { 
-
-  height: 600px; 
-
-  overflow-y: auto; 
-
-} 
-
- 
-
-h1 { 
-
-  color: #2c3e50; 
-
-  margin-bottom: 20px; 
-
-} 
+.domain-2 {
+  color: green;
+}
