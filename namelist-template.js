@@ -1,10 +1,10 @@
-function generateNamelist(domains) { 
+function generateNamelist(bounds, domainCount) { 
 
   let namelist = `&share 
 
  wrf_core = 'ARW', 
 
- max_dom = ${domains.length}, 
+ max_dom = ${domainCount}, 
 
  start_date = '2000-01-01_00:00:00', 
 
@@ -28,45 +28,45 @@ function generateNamelist(domains) {
 
  
 
-  domains.forEach((bounds, i) => { 
+  for (let i = 0; i < domainCount; i++) { 
 
-    const center = bounds.getCenter(); 
+    const nestFactor = 0.8 ** i; 
 
     namelist += ` 
 
  parent_grid_ratio = ${i === 0 ? 1 : 3}, 
 
- i_parent_start    = ${i === 0 ? 1 : 10}, 
+ i_parent_start    = ${i === 0 ? 1 : Math.floor((1 - nestFactor) * 100)}, 
 
- j_parent_start    = ${i === 0 ? 1 : 10}, 
+ j_parent_start    = ${i === 0 ? 1 : Math.floor((1 - nestFactor) * 100)}, 
 
- e_we              = 100, 
+ e_we              = ${100 - Math.floor((1 - nestFactor) * 100)}, 
 
- e_sn              = 100, 
+ e_sn              = ${100 - Math.floor((1 - nestFactor) * 100)},`; 
 
- geog_data_res     = 'default', 
-
- dx                = ${i === 0 ? 10000 : 3000}, 
-
- dy                = ${i === 0 ? 10000 : 3000}, 
-
- map_proj          = 'lat-lon', 
-
- ref_lat           = ${center.lat.toFixed(4)}, 
-
- ref_lon           = ${center.lng.toFixed(4)}, 
-
- truelat1          = ${center.lat.toFixed(4)}, 
-
- truelat2          = ${center.lat.toFixed(4)}, 
-
- stand_lon         = ${center.lng.toFixed(4)},`; 
-
-  }); 
+  } 
 
  
 
   namelist += ` 
+
+ geog_data_res = 'default', 
+
+ dx = 10000, 
+
+ dy = 10000, 
+
+ map_proj = 'lat-lon', 
+
+ ref_lat   = ${bounds.getCenter().lat.toFixed(2)}, 
+
+ ref_lon   = ${bounds.getCenter().lng.toFixed(2)}, 
+
+ truelat1  = ${bounds.getCenter().lat.toFixed(2)}, 
+
+ truelat2  = ${bounds.getCenter().lat.toFixed(2)}, 
+
+ stand_lon = ${bounds.getCenter().lng.toFixed(2)}, 
 
 / 
 
@@ -74,4 +74,4 @@ function generateNamelist(domains) {
 
   return namelist; 
 
-} 
+}
