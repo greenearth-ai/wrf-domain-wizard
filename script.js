@@ -10,6 +10,15 @@ map.addLayer(drawnItems);
 // Store domain references
 const domains = [];
 
+// Initialize draw control (disabled for now)
+const drawControl = new L.Control.Draw({
+  edit: {
+    featureGroup: drawnItems
+  },
+  draw: false
+});
+map.addControl(drawControl);
+
 // Ensure map is fully initialized
 map.whenReady(function() {
   document.getElementById('drawBtn').addEventListener('click', drawDomains);
@@ -43,8 +52,12 @@ function drawDomains() {
       }).addTo(drawnItems);
       
       // Enable editing (resizing and moving)
-      domain.editing = new L.Handler.RectangleEdit(map, domain);
-      domain.editing.enable();
+      if (domain.editing) {
+        domain.editing.enable();
+      } else {
+        domain.editing = new L.Handler.RectangleEdit(domain, map);
+        domain.editing.enable();
+      }
       
       // Store reference
       domains.push(domain);

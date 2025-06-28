@@ -14,7 +14,7 @@ h1 {
   margin-bottom: 20px;
 }
 
-/* Style for resizable domains */
+/* Style for editable domains */
 .leaflet-interactive {
   cursor: move;
 }
@@ -34,6 +34,15 @@ h1 {
   fill: rgba(0, 255, 0, 0.1);
 }
 
+/* Style for edit handles */
 .leaflet-draw-toolbar a {
   background-image: url('https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/images/spritesheet.png');
+}
+
+.leaflet-edit-resize {
+  background-color: white;
+  border: 2px solid #333;
+  border-radius: 50%;
+  width: 10px !important;
+  height: 10px !important;
 }
