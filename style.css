@@ -14,35 +14,35 @@ h1 {
   margin-bottom: 20px;
 }
 
-/* Style for editable domains */
-.leaflet-interactive {
-  cursor: move;
-}
-
+/* Domain styling */
 .domain-0 {
+  color: red;
+  fill-opacity: 0.1;
   stroke: red;
-  fill: rgba(255, 0, 0, 0.1);
 }
 
 .domain-1 {
+  color: blue;
+  fill-opacity: 0.1;
   stroke: blue;
-  fill: rgba(0, 0, 255, 0.1);
 }
 
 .domain-2 {
+  color: green;
+  fill-opacity: 0.1;
   stroke: green;
-  fill: rgba(0, 255, 0, 0.1);
 }
 
-/* Style for edit handles */
-.leaflet-draw-toolbar a {
-  background-image: url('https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/images/spritesheet.png');
-}
-
-.leaflet-edit-resize {
+/* Edit handles */
+.leaflet-marker-icon {
   background-color: white;
   border: 2px solid #333;
   border-radius: 50%;
   width: 10px !important;
   height: 10px !important;
+}
+
+.leaflet-div-icon {
+  background: none;
+  border: none;
 }

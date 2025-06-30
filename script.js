@@ -10,10 +10,12 @@ map.addLayer(drawnItems);
 // Store domain references
 const domains = [];
 
-// Initialize draw control (disabled for now)
+// Initialize draw control
 const drawControl = new L.Control.Draw({
   edit: {
-    featureGroup: drawnItems
+    featureGroup: drawnItems,
+    edit: false,
+    remove: false
   },
   draw: false
 });
@@ -51,13 +53,9 @@ function drawDomains() {
         className: `domain-${i}`
       }).addTo(drawnItems);
       
-      // Enable editing (resizing and moving)
-      if (domain.editing) {
-        domain.editing.enable();
-      } else {
-        domain.editing = new L.Handler.RectangleEdit(domain, map);
-        domain.editing.enable();
-      }
+      // Enable editing
+      domain.editing = new L.Edit.Rectangle(map, domain);
+      domain.editing.enable();
       
       // Store reference
       domains.push(domain);
@@ -112,7 +110,7 @@ function exportNamelist() {
     }
     
     const domainCount = domains.length;
-    const bounds = domains[0].getBounds(); // Use parent domain bounds
+    const bounds = domains[0].getBounds();
     
     const namelist = generateNamelist(bounds, domainCount);
     
